@@ -9,6 +9,7 @@ export type FavoriteMovie = {
   poster_path?: string | null;
   release_date?: string | null;
   vote_average?: number | null;
+  year?: string | null;
 };
 
 type FavoritesContextType = {
