@@ -84,6 +84,9 @@ export default function Home() {
       const data = await response.json();
 
       if (!response.ok) {
+        if (data.error === "LIMIT_REACHED") {
+          throw new Error(`LIMIT_REACHED: ${data.message || "Please log in."}`);
+        }
         throw new Error(data.error || "Failed to identify the movie");
       }
 
@@ -351,9 +354,21 @@ export default function Home() {
 
         {/* Error State */}
         {error && (
-          <div className="max-w-2xl mx-auto mt-12 p-6 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-4 text-red-400">
-            <svg className="w-6 h-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <p className="font-medium text-sm md:text-base">{error}</p>
+          <div className="max-w-2xl mx-auto mt-12 p-6 bg-red-500/10 border border-red-500/20 rounded-2xl flex flex-col sm:flex-row items-center gap-4 text-red-500">
+            <div className="shrink-0 bg-red-500/20 p-3 rounded-full">
+               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+            
+            <div className="flex-1 text-center sm:text-left">
+                <p className="font-medium text-sm md:text-base">
+                  {error.startsWith("LIMIT_REACHED: ") ? error.replace("LIMIT_REACHED: ", "") : error}
+                </p>
+                {error.startsWith("LIMIT_REACHED: ") && (
+                  <a href="/api/auth/signin" className="inline-block mt-3 px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-full text-sm transition-colors shadow-lg">
+                     Sign Up / Login with Google
+                  </a>
+                )}
+            </div>
           </div>
         )}
 

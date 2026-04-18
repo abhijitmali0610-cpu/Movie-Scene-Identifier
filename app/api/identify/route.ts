@@ -1,8 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI, Type } from "@google/genai";
+import { auth } from "@/auth";
+import { cookies } from "next/headers";
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+
+    if (!session) {
+      const cookieStore = await cookies();
+      const identifyCount = parseInt(cookieStore.get("identify_count")?.value || "0", 10);
+      if (identifyCount >= 1) {
+        return NextResponse.json(
+          { error: "LIMIT_REACHED", message: "You have reached your free search limit. Please log in for unlimited searches." },
+          { status: 401 }
+        );
+      }
+    }
+
     const formData = await req.formData();
     const file = formData.get("image") as File | null;
 
@@ -136,6 +151,11 @@ export async function POST(req: NextRequest) {
         }
       })
     );
+
+    if (!session) {
+      const cookieStore = await cookies();
+      cookieStore.set("identify_count", "1", { httpOnly: true, maxAge: 60 * 60 * 24 * 365, path: '/' });
+    }
 
     return NextResponse.json({ results: enrichedResults });
 

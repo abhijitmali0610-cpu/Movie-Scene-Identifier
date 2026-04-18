@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { FavoritesProvider } from "./context/FavoritesContext";
+import { auth, signIn, signOut } from "@/auth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,11 +19,13 @@ export const metadata: Metadata = {
   description: "Find movies from screenshots using top-class AI tools.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html
       lang="en"
@@ -41,6 +44,21 @@ export default function RootLayout({
                <a href="/favorites" className="hover:text-white transition-colors">Favorites</a>
                <a href="/about" className="hover:text-white transition-colors">About Us</a>
                <a href="/contact" className="hover:text-white transition-colors">Contact Us</a>
+               
+               {session?.user ? (
+                 <div className="flex items-center gap-3 ml-2 pl-4 border-l border-white/10">
+                   {session.user.image && <img src={session.user.image} alt="Avatar" className="w-8 h-8 rounded-full border border-white/20" />}
+                   <form action={async () => { "use server"; await signOut(); }}>
+                      <button type="submit" className="text-sm font-semibold hover:text-white transition-colors">Sign Out</button>
+                   </form>
+                 </div>
+               ) : (
+                 <div className="flex items-center gap-3 ml-2 pl-4 border-l border-white/10">
+                    <form action={async () => { "use server"; await signIn("google"); }}>
+                      <button type="submit" className="text-sm font-semibold px-4 py-1.5 bg-white text-black rounded-full hover:bg-neutral-200 transition-colors shadow-lg">Sign In</button>
+                    </form>
+                 </div>
+               )}
             </nav>
           </div>
         </header>
