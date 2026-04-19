@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { signOut } from "next-auth/react";
 import { Menu, X } from "lucide-react";
 
 interface MobileNavProps {
@@ -47,24 +48,20 @@ export function MobileNav({ isSignedIn, userImage }: MobileNavProps) {
                 {userImage && (
                   <img src={userImage} alt="Avatar" className="w-8 h-8 rounded-full border border-white/20" />
                 )}
-                <form action="/api/auth/signout" method="POST">
-                  <button
-                    type="submit"
-                    className="text-sm font-semibold text-neutral-300 hover:text-white transition-colors"
-                  >
-                    Sign Out
-                  </button>
-                </form>
+                <button
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="text-sm font-semibold text-neutral-300 hover:text-white transition-colors"
+                >
+                  Sign Out
+                </button>
               </div>
             ) : (
-              <form action="/api/auth/signin" method="GET">
-                <button
-                  type="submit"
-                  className="w-full text-sm font-semibold px-4 py-2 bg-white text-black rounded-full hover:bg-neutral-200 transition-colors shadow-lg"
-                >
-                  Sign In
-                </button>
-              </form>
+              <a
+                href="/signin"
+                className="block w-full text-center text-sm font-semibold px-4 py-2 bg-white text-black rounded-full hover:bg-neutral-200 transition-colors shadow-lg"
+              >
+                Sign In
+              </a>
             )}
           </div>
         </div>
