@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { FavoritesProvider } from "./context/FavoritesContext";
 import { Providers } from "./components/Providers";
+import { MobileNav } from "./components/MobileNav";
 import { auth, signIn, signOut } from "@/auth";
 
 const geistSans = Geist({
@@ -40,9 +41,11 @@ export default async function RootLayout({
                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 3v18"/><path d="M3 7.5h4"/><path d="M3 12h18"/><path d="M3 16.5h4"/><path d="M17 3v18"/><path d="M17 7.5h4"/><path d="M17 16.5h4"/></svg>
                Visual Search AI
             </a>
-            <nav className="flex items-center gap-6 text-sm font-medium text-neutral-300">
+            {/* Desktop Nav */}
+            <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-neutral-300">
                <a href="/" className="hover:text-white transition-colors">Home</a>
                <a href="/favorites" className="hover:text-white transition-colors">Favorites</a>
+               <a href="/pricing" className="hover:text-white transition-colors">Pricing</a>
                <a href="/about" className="hover:text-white transition-colors">About Us</a>
                <a href="/contact" className="hover:text-white transition-colors">Contact Us</a>
                
@@ -61,6 +64,9 @@ export default async function RootLayout({
                  </div>
                )}
             </nav>
+
+            {/* Mobile Hamburger */}
+            <MobileNav isSignedIn={!!session?.user} userImage={session?.user?.image} />
           </div>
         </header>
         <div className="flex-1">
