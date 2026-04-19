@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI, Type } from "@google/genai";
 import { auth } from "@/auth";
 import { cookies } from "next/headers";
+import { db } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,9 +13,29 @@ export async function POST(req: NextRequest) {
       const identifyCount = parseInt(cookieStore.get("identify_count")?.value || "0", 10);
       if (identifyCount >= 1) {
         return NextResponse.json(
-          { error: "LIMIT_REACHED", message: "You have reached your free search limit. Please log in for unlimited searches." },
+          { error: "LIMIT_REACHED", message: "You have reached your free search limit. Please log in for more searches." },
           { status: 401 }
         );
+      }
+    } else if (session.user?.id) {
+      const user = await db.user.findUnique({ where: { id: session.user.id } });
+      if (user) {
+        const isPlatinum = user.plan === "PLATINUM" && user.planExpires && user.planExpires > new Date();
+        const isGold = user.plan === "GOLD" && user.planExpires && user.planExpires > new Date();
+        
+        if (!isPlatinum && !isGold) {
+          const allowedSearches = 3 + user.bonusRequests;
+          if (user.searchCount >= allowedSearches) {
+            return NextResponse.json(
+              { error: "PAYMENT_REQUIRED", message: "You have used all your search credits." },
+              { status: 402 }
+            );
+          }
+          await db.user.update({
+            where: { id: user.id },
+            data: { searchCount: user.searchCount + 1 }
+          });
+        }
       }
     }
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { FavoritesProvider } from "./context/FavoritesContext";
+import { Providers } from "./components/Providers";
 import { auth, signIn, signOut } from "@/auth";
 
 const geistSans = Geist({
@@ -54,7 +55,7 @@ export default async function RootLayout({
                  </div>
                ) : (
                  <div className="flex items-center gap-3 ml-2 pl-4 border-l border-white/10">
-                    <form action={async () => { "use server"; await signIn("google"); }}>
+                    <form action={async () => { "use server"; await signIn(); }}>
                       <button type="submit" className="text-sm font-semibold px-4 py-1.5 bg-white text-black rounded-full hover:bg-neutral-200 transition-colors shadow-lg">Sign In</button>
                     </form>
                  </div>
@@ -63,9 +64,11 @@ export default async function RootLayout({
           </div>
         </header>
         <div className="flex-1">
-          <FavoritesProvider>
-            {children}
-          </FavoritesProvider>
+          <Providers>
+            <FavoritesProvider>
+              {children}
+            </FavoritesProvider>
+          </Providers>
         </div>
       </body>
     </html>

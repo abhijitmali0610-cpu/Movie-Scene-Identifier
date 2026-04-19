@@ -43,6 +43,10 @@ model User {
   email         String?   @unique
   emailVerified DateTime? @map("email_verified")
   image         String?
+  searchCount   Int       @default(0)
+  bonusRequests Int       @default(0)
+  plan          String    @default("FREE")
+  planExpires   DateTime?
   accounts      Account[]
   sessions      Session[]
  

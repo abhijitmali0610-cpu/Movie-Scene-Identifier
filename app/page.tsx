@@ -87,6 +87,9 @@ export default function Home() {
         if (data.error === "LIMIT_REACHED") {
           throw new Error(`LIMIT_REACHED: ${data.message || "Please log in."}`);
         }
+        if (data.error === "PAYMENT_REQUIRED") {
+            throw new Error(`PAYMENT_REQUIRED: ${data.message || "Upgrade to continue."}`);
+        }
         throw new Error(data.error || "Failed to identify the movie");
       }
 
@@ -361,11 +364,18 @@ export default function Home() {
             
             <div className="flex-1 text-center sm:text-left">
                 <p className="font-medium text-sm md:text-base">
-                  {error.startsWith("LIMIT_REACHED: ") ? error.replace("LIMIT_REACHED: ", "") : error}
+                  {error.startsWith("LIMIT_REACHED: ") ? error.replace("LIMIT_REACHED: ", "") : 
+                   error.startsWith("PAYMENT_REQUIRED: ") ? error.replace("PAYMENT_REQUIRED: ", "") :
+                   error}
                 </p>
                 {error.startsWith("LIMIT_REACHED: ") && (
                   <a href="/api/auth/signin" className="inline-block mt-3 px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-full text-sm transition-colors shadow-lg">
-                     Sign Up / Login with Google
+                     Sign Up / Login
+                  </a>
+                )}
+                {error.startsWith("PAYMENT_REQUIRED: ") && (
+                  <a href="/pricing" className="inline-block mt-3 px-5 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold rounded-full text-sm transition-all shadow-lg shadow-purple-900/40 transform hover:-translate-y-0.5">
+                     View Pricing Plans
                   </a>
                 )}
             </div>
