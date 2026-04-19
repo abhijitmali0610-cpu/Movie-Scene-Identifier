@@ -18,23 +18,29 @@ export async function POST(req: NextRequest) {
         );
       }
     } else if (session.user?.id) {
-      const user = await db.user.findUnique({ where: { id: session.user.id } });
-      if (user) {
-        const isPlatinum = user.plan === "PLATINUM" && user.planExpires && user.planExpires > new Date();
-        const isGold = user.plan === "GOLD" && user.planExpires && user.planExpires > new Date();
-        
-        if (!isPlatinum && !isGold) {
-          const allowedSearches = 3 + user.bonusRequests;
-          if (user.searchCount >= allowedSearches) {
-            return NextResponse.json(
-              { error: "PAYMENT_REQUIRED", message: "You have used all your search credits." },
-              { status: 402 }
-            );
+      // Admin bypass — unlimited requests
+      const ADMIN_EMAILS = ["abhijitmali0610@gmail.com"];
+      const isAdmin = ADMIN_EMAILS.includes(session.user?.email ?? "");
+
+      if (!isAdmin) {
+        const user = await db.user.findUnique({ where: { id: session.user.id } });
+        if (user) {
+          const isPlatinum = user.plan === "PLATINUM" && user.planExpires && user.planExpires > new Date();
+          const isGold = user.plan === "GOLD" && user.planExpires && user.planExpires > new Date();
+
+          if (!isPlatinum && !isGold) {
+            const allowedSearches = 3 + user.bonusRequests;
+            if (user.searchCount >= allowedSearches) {
+              return NextResponse.json(
+                { error: "PAYMENT_REQUIRED", message: "You have used all your search credits." },
+                { status: 402 }
+              );
+            }
+            await db.user.update({
+              where: { id: user.id },
+              data: { searchCount: user.searchCount + 1 }
+            });
           }
-          await db.user.update({
-            where: { id: user.id },
-            data: { searchCount: user.searchCount + 1 }
-          });
         }
       }
     }
